@@ -150,6 +150,7 @@ exp3: exp4
 exp4: exp5
 	| exp4 T_MUL exp5
 	| exp4 T_DIV exp5
+	| exp4 T_MOD exp5
 
 exp5: exp6
 	| T_NOT exp5
