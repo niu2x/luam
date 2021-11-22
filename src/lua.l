@@ -18,6 +18,7 @@ static char * str_pattern = 0;
 static int str_pattern_size = 0;
 static char * str_temp = 0;
 static int str_temp_size = 0;
+static char last_char;
 
 struct buffer_t {
 	char *base;
@@ -62,10 +63,8 @@ static struct buffer_t str;
 
 
 static int str_read_char() {
+	last_char = str_temp[str_temp_size];
 	int c = input();
-	if(c == '\\'){
-		c = input();
-	}
 	str_temp[str_temp_size ++] = c;
 	return !c;
 }
@@ -147,6 +146,7 @@ extern int yyerror(char *message, ...);
 
 	str_temp = strdup(sz);
 	str_temp_size = 0;
+	last_char = 0;
 
 	int eof = 0;
 	while((!eof) && str_temp_size < n){ 
@@ -183,6 +183,7 @@ extern int yyerror(char *message, ...);
 	str_temp = strdup(yytext);
 	str_pattern_size = strlen(str_pattern);
 	str_temp_size = 0;
+	last_char = 0;
 	buffer_init(&str);
 	//printf("str begin %d %s\n", yylineno, str_pattern);
 
@@ -197,12 +198,18 @@ extern int yyerror(char *message, ...);
 			eof = 1;
 		}
 	}
-	while ((!eof) && strcmp(str_pattern, str_temp) != 0){
+	//printf("str_pattern %s\n", str_pattern);
+	//printf("str_temp %s\n", str_temp);
+	while ((!eof) && (strcmp(str_pattern, str_temp) != 0 || (last_char == '\\' && str_pattern_size == 1))){
 		buffer_push(&str, str_temp[0]);
 		str_shift();
 		if(str_read_char()) {
 			eof = 1;
 		}
+
+		//printf("str_pattern %s\n", str_pattern);
+		//printf("str_temp %s\n", str_temp);
+		//printf("eof %d %x\n", eof, last_char);
 	}
 	buffer_push(&str, 0);
 

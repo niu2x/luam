@@ -3,6 +3,10 @@
 	
 }
 
+%glr-parser
+%expect 1
+%expect-rr 1 
+
 %token T_NAME
 %token T_NUMBER
 %token T_STRING
@@ -81,7 +85,7 @@ laststat: T_RETURN
 	| T_BREAK
 
 stat: varlist T_ASSIGN explist
-	| functioncall
+	| functioncall %dprec 1
 	| T_DO block T_END
 	| T_REPEAT block T_UNTIL exp
 	| T_IF exp T_THEN block elseiflist elsepart T_END
@@ -169,10 +173,9 @@ expterm: T_NIL
 	| function
 	| prefixexp
 	| tableconstructor
-	| T_OP exp T_CP
 
 prefixexp: var
-	| functioncall
+	| functioncall %dprec 2
 	| T_OP exp T_CP
 
 functioncall: prefixexp args
@@ -195,10 +198,11 @@ parlist: namelist
 tableconstructor: T_OC T_CC
 	| T_OC fieldlist T_CC
 
-fieldlist: field
-	| field fieldsep
-	| fieldlist field
-	| fieldlist field fieldsep
+fieldlistnotailfieldseq: field
+	| fieldlistnotailfieldseq fieldsep field
+
+fieldlist: fieldlistnotailfieldseq
+	| fieldlistnotailfieldseq fieldsep
 
 fieldsep: T_COMMA
 	| T_SEMICOLON
