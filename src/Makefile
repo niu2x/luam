@@ -1,4 +1,4 @@
-C_FLAGS := -g
+C_FLAGS := -g -DYYDEBUG=1
 LD_FLAGS := 
 
 all: luam

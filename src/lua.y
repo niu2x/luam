@@ -3,9 +3,6 @@
 	
 }
 
-%glr-parser
-%expect 1
-%expect-rr 1 
 
 %token T_NAME
 %token T_NUMBER
@@ -84,8 +81,12 @@ laststat: T_RETURN
 	| T_RETURN explist
 	| T_BREAK
 
+prefixexp: var
+	| functioncall
+	| T_OP exp T_CP
+	
 stat: varlist T_ASSIGN explist
-	| functioncall %dprec 1
+	| functioncall
 	| T_DO block T_END
 	| T_REPEAT block T_UNTIL exp
 	| T_IF exp T_THEN block elseiflist elsepart T_END
@@ -174,9 +175,7 @@ expterm: T_NIL
 	| prefixexp
 	| tableconstructor
 
-prefixexp: var
-	| functioncall %dprec 2
-	| T_OP exp T_CP
+
 
 functioncall: prefixexp args
 	| prefixexp T_COLON T_NAME args
