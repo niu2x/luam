@@ -172,15 +172,20 @@ extern int yyerror(char *message, ...);
 }
 
 "--" {
+	int eof = 0;
 	int c = input();
-	while(c && c != '\n'){
+	if(!c) eof = 1;
+	while((!eof) && c != '\n'){
 		c = input();
+		if(!c) eof = 1;
 	}
 	//printf("comment: %s\n", yytext);
+	if(eof) yyterminate();
 }
 
 [_a-zA-Z][_a-zA-Z0-9]* {return T_NAME;}
-[-]?(0x[0-9a-fA-F]+)|([0-9]+("."[0-9]+)?) {return T_NUMBER;}
+[-]?(0x[0-9a-fA-F]+)|([0-9]+("."[0-9]*)?("e"([+-])?[0-9]+)?) {return T_NUMBER;}
+[-]?"."([0-9]+)?("e"([+-])?[0-9]+)? {return T_NUMBER;}
 ("\"")|("\'")|("["=*"[")  {
 	str_pattern = strdup(yytext);
 	str_temp = strdup(yytext);
