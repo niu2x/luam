@@ -69,6 +69,7 @@ stat_t *create_stat(int type,
 	, funcname_t *funcname
 	, funcbody_t *funcbody
 	, name_t *name
+	, namelist_t *namelist
 ) {
 	stat_t *stat = ALLOC(stat_t) ;
 	stat->type = type ;
@@ -85,6 +86,7 @@ stat_t *create_stat(int type,
 	stat->funcname = funcname ;
 	stat->funcbody = funcbody ;
 	stat->name = name ;
+	stat->namelist = namelist ;
 	return stat ;
 }
 

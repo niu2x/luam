@@ -75,6 +75,7 @@
 	struct exp3_t *exp3;
 	struct exp2_t *exp2;
 	struct exp1_t *exp1;
+	struct exp0_t *exp0;
 	struct exp_t *exp;
 	struct explist_t *explist;
 	struct namelist_t *namelist;
@@ -164,127 +165,127 @@ prefixexp: var   			{ $$ = create_prefixexp($1, 0, 0);}
 	| functioncall          { $$ = create_prefixexp(0, $1, 0);}
 	| T_OP exp T_CP         { $$ = create_prefixexp(0, 0, $2);}
 	
-stat: varlist T_ASSIGN explist { $$ = create_stat(stat_type_varlist_assgin_explist, $1, $3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| functioncall { $$ = create_stat(stat_type_functioncall, 0, 0, $1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| T_DO block T_END { $$ = create_stat(stat_type_do_block_end, 0, 0, 0, $1, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| T_REPEAT block T_UNTIL exp { $$ = create_stat(stat_type_repeat_block_until_end, 0, 0, 0, $2, $4, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| T_IF exp T_THEN block elseiflist elsepart T_END { $$ = create_stat(stat_type_if, 0, 0, 0, $4, $2, $5, $6, 0, 0, 0, 0, 0, 0);}
-	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop, 0, 0, 0, 0, 0, 0, 0, $4, $6, 0, 0, 0, $2);}
-	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_COMMA exp T_DO block T_END
-	| T_FOR namelist T_IN explist T_DO block T_END
-	| T_FUNCTION funcname funcbody
-	| T_LOCAL T_FUNCTION T_NAME funcbody
-	| T_LOCAL namelist
-	| T_LOCAL namelist T_ASSIGN explist
-	| T_WHILE exp T_DO block T_END
+stat: varlist T_ASSIGN explist { $$ = create_stat(stat_type_varlist_assgin_explist, $1, $3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
+	| functioncall { $$ = create_stat(stat_type_functioncall, 0, 0, $1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
+	| T_DO block T_END { $$ = create_stat(stat_type_do_block_end, 0, 0, 0, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
+	| T_REPEAT block T_UNTIL exp { $$ = create_stat(stat_type_repeat_block_until_end, 0, 0, 0, $2, $4, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
+	| T_IF exp T_THEN block elseiflist elsepart T_END { $$ = create_stat(stat_type_if, 0, 0, 0, $4, $2, $5, $6, 0, 0, 0, 0, 0, 0, 0);}
+	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop, 0, 0, 0, $8, 0, 0, 0, $4, $6, 0, 0, 0, $2, 0);}
+	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop_step, 0, 0, 0, $10, 0, 0, 0, $4, $6, $8, 0, 0, $2, 0);}
+	| T_FOR namelist T_IN explist T_DO block T_END { $$ = create_stat(stat_type_for_in, 0, $4, 0, $6, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2);}
+	| T_FUNCTION funcname funcbody { $$ = create_stat(stat_type_function, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2, $3, 0, 0);}
+	| T_LOCAL T_FUNCTION T_NAME funcbody { $$ = create_stat(stat_type_local_function, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $4, $3, 0);}
+	| T_LOCAL namelist { $$ = create_stat(stat_type_local_namelist, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2);}
+	| T_LOCAL namelist T_ASSIGN explist { $$ = create_stat(stat_type_local_namelist_assgin_explist, 0, $4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2);}
+	| T_WHILE exp T_DO block T_END { $$ = create_stat(stat_type_while, 0, 0, 0, $4, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
 
-elseiflist: 
-	| elseiflist elseifpart
+elseiflist:  { $$ = create_elseiflist(0, 0);}
+	| elseiflist elseifpart { $$ = create_elseiflist($1, $2);}
 
-elseifpart: T_ELSEIF exp T_THEN block
+elseifpart: T_ELSEIF exp T_THEN block { $$ = create_elseifpart($2, $4);}
 
-elsepart: 
-	| T_ELSE block
+elsepart:  { $$ = create_elsepart(0);}
+	| T_ELSE block { $$ = create_elsepart($2);}
 
-funcname: T_NAME funcnamememberlist funcnamelastmemberpart
+funcname: T_NAME funcnamememberlist funcnamelastmemberpart { $$ = create_funcname($1, $2, $3);}
 
-funcnamememberlist: 
-	| funcnamememberlist funcnamememberpart
+funcnamememberlist:  { $$ = create_funcnamememberlist(0, 0);}
+	| funcnamememberlist funcnamememberpart   { $$ = create_funcnamememberlist($1, $2);}
 
-funcnamememberpart: T_DOT T_NAME
+funcnamememberpart: T_DOT T_NAME   { $$ = create_funcnamememberpart($2);}
 
-funcnamelastmemberpart: 
-	| T_COLON T_NAME
+funcnamelastmemberpart:    { $$ = create_funcnamelastmemberpart(0);}
+	| T_COLON T_NAME   { $$ = create_funcnamelastmemberpart($2);}
 
-varlist: var
-	| varlist T_COMMA var
+varlist: var  { $$ = create_varlist(0, 0);}
+	| varlist T_COMMA var  { $$ = create_varlist($3, $1);}
 
-var: T_NAME
-	| prefixexp T_OB exp T_CB
-	| prefixexp T_DOT T_NAME
+var: T_NAME                       { $$ = create_var($1, 0, 0);}
+	| prefixexp T_OB exp T_CB     { $$ = create_var(0, $3, $1);}
+	| prefixexp T_DOT T_NAME      { $$ = create_var($3, 0, $1);}
 
-namelist: T_NAME
-	| namelist T_COMMA T_NAME
+namelist: T_NAME                { $$ = create_namelist($1, 0);}
+	| namelist T_COMMA T_NAME   { $$ = create_namelist($3, $1);}
 
-explist: exp
-	| explist T_COMMA exp
+explist: exp                    { $$ = create_explist( $1, 0);}
+	| explist T_COMMA exp    	{ $$ = create_explist( $3, $1);}
 
-exp: exp0
-	| exp T_OR exp0
+exp: exp0                        	{ $$ = create_exp($1, 0);}
+	| exp T_OR exp0            		{ $$ = create_exp($3, $1);}
 
-exp0: exp1
-	| exp0 T_AND exp1
+exp0: exp1               	{ $$ = create_exp0($1, 0);}
+	| exp0 T_AND exp1    	{ $$ = create_exp0($3, $1);}
 
-exp1: exp2
-	| exp1 T_LESS exp2
-	| exp1 T_LE exp2
-	| exp1 T_GREATE exp2
-	| exp1 T_GE exp2
-	| exp1 T_EQ exp2
-	| exp1 T_NE exp2
+exp1: exp2               	{ $$ = create_exp1($1, 0, 0);}
+	| exp1 T_LESS exp2    	{ $$ = create_exp1($3, $1, T_LESS);}
+	| exp1 T_LE exp2      	{ $$ = create_exp1($3, $1, T_LE);}
+	| exp1 T_GREATE exp2   	{ $$ = create_exp1($3, $1, T_GREATE);}
+	| exp1 T_GE exp2 		{ $$ = create_exp1($3, $1, T_GE);}
+	| exp1 T_EQ exp2 		{ $$ = create_exp1($3, $1, T_EQ);}
+	| exp1 T_NE exp2 		{ $$ = create_exp1($3, $1, T_NE);}
 
-exp2: exp3
-	| exp2 T_CONCAT exp3
+exp2: exp3 					{ $$ = create_exp2($1, 0);}
+	| exp2 T_CONCAT exp3 	{ $$ = create_exp2($3, $1);}
 
-exp3: exp4
-	| exp3 T_ADD exp4
-	| exp3 T_MINUS exp4
+exp3: exp4 					{ $$ = create_exp3($1, 0, 0);}
+	| exp3 T_ADD exp4       { $$ = create_exp3($3, $1, T_ADD);}
+	| exp3 T_MINUS exp4  	{ $$ = create_exp3($3, $1, T_MINUS);}
 
-exp4: exp5
-	| exp4 T_MUL exp5
-	| exp4 T_DIV exp5
-	| exp4 T_MOD exp5
+exp4: exp5 					{ $$ = create_exp4($1, 0, 0);}
+	| exp4 T_MUL exp5 		{ $$ = create_exp4($3, $1, T_MUL);}
+	| exp4 T_DIV exp5 		{ $$ = create_exp4($3, $1, T_DIV);}
+	| exp4 T_MOD exp5 		{ $$ = create_exp4($3, $1, T_MOD);}
 
-exp5: exp6
-	| T_NOT exp5
-	| T_MINUS exp5
-	| T_LEN exp5
+exp5: exp6 					{ $$ = create_exp5($1, 0, 0);}
+	| T_NOT exp5 			{ $$ = create_exp5(0, $2, T_NOT);}
+	| T_MINUS exp5  		{ $$ = create_exp5(0, $2, T_MINUS);}
+	| T_LEN exp5 			{ $$ = create_exp5(0, $2, T_LEN);}
 
-exp6: expterm
-	| exp6 T_POW expterm
+exp6: expterm   			{ $$ = create_exp6($1, 0);}
+	| exp6 T_POW expterm    { $$ = create_exp6($3, $1);}
 
-expterm: T_NIL
-	| T_FALSE
-	| T_TRUE
-	| T_NUMBER
-	| T_STRING
-	| T_VARGS
-	| function
-	| prefixexp
-	| tableconstructor
+expterm: T_NIL 				{ $$ = create_expterm(expterm_type_nil, 0, 0, 0, 0, 0);}
+	| T_FALSE				{ $$ = create_expterm(expterm_type_false, 0, 0, 0, 0, 0);}
+	| T_TRUE 				{ $$ = create_expterm(expterm_type_true, 0, 0, 0, 0, 0);}
+	| T_NUMBER     			{ $$ = create_expterm(expterm_type_number, $1, 0, 0, 0, 0);}
+	| T_STRING    			{ $$ = create_expterm(expterm_type_string, 0, $1, 0, 0, 0);}
+	| T_VARGS               { $$ = create_expterm(expterm_type_vargs, 0, 0, 0, 0, 0);}
+	| function 				{ $$ = create_expterm(expterm_type_function, 0, 0, $1, 0, 0);}
+	| prefixexp             { $$ = create_expterm(expterm_type_prefixexp, 0, 0, 0, $1, 0);}
+	| tableconstructor      { $$ = create_expterm(expterm_type_tableconstructor, 0, 0, 0, 0, $1);}
 
-functioncall: prefixexp args
-	| prefixexp T_COLON T_NAME args
+functioncall: prefixexp args  		{ $$ = create_functioncall($1, $2, 0);}
+	| prefixexp T_COLON T_NAME args { $$ = create_functioncall($1, $4, $3);}
 
-args: T_OP T_CP
-	| T_OP explist T_CP
-	| tableconstructor
-	| T_STRING
+args: T_OP T_CP						{ $$ = create_args(0, 0, 0);}
+	| T_OP explist T_CP				{ $$ = create_args($2, 0, 0);}
+	| tableconstructor 				{ $$ = create_args(0, $1, 0);}
+	| T_STRING 						{ $$ = create_args(0, 0, $1);}
 
-function: T_FUNCTION funcbody
+function: T_FUNCTION funcbody  			{ $$ = create_function($2);}
 
-funcbody: T_OP T_CP block T_END
-	| T_OP parlist T_CP block T_END
+funcbody: T_OP T_CP block T_END  		{ $$ = create_funcbody($3, 0);}
+	| T_OP parlist T_CP block T_END 	{ $$ = create_funcbody($4, $2);}
 
-parlist: namelist
-	| namelist T_COMMA T_VARGS
-	| T_VARGS
+parlist: namelist  					{ $$ = create_parlist($1, 0);}
+	| namelist T_COMMA T_VARGS 		{ $$ = create_parlist($1, 1);}
+	| T_VARGS 						{ $$ = create_parlist(0, 1);}
 
-tableconstructor: T_OC T_CC
-	| T_OC fieldlist T_CC
+tableconstructor: T_OC T_CC 		{ $$ = create_tableconstructor(0);}
+	| T_OC fieldlist T_CC 			{ $$ = create_tableconstructor($2);}
 
-fieldlistnotailfieldseq: field
-	| fieldlistnotailfieldseq fieldsep field
+fieldlistnotailfieldseq: field  				{ $$ = create_fieldlistnotailfieldseq($1, 0, 0);}
+	| fieldlistnotailfieldseq fieldsep field    { $$ = create_fieldlistnotailfieldseq($3, $1, $2);}
 
-fieldlist: fieldlistnotailfieldseq
-	| fieldlistnotailfieldseq fieldsep
+fieldlist: fieldlistnotailfieldseq  	{ $$ = create_fieldlist($1, 0);}
+	| fieldlistnotailfieldseq fieldsep 	{ $$ = create_fieldlist($1, $2);}
 
-fieldsep: T_COMMA
-	| T_SEMICOLON
+fieldsep: T_COMMA 		{ $$ = create_fieldsep(fieldsep_type_comma);}
+	| T_SEMICOLON 		{ $$ = create_fieldsep(fieldsep_type_semicolon);}
 
-field: T_OB exp T_CB T_ASSIGN exp
-	| T_NAME T_ASSIGN exp
-	| exp
+field: T_OB exp T_CB T_ASSIGN exp  	{ $$ = create_field($5, $2, 0);}
+	| T_NAME T_ASSIGN exp  			{ $$ = create_field($3, 0, $1);}
+	| exp 							{ $$ = create_field($1, 0, 0);}
 
 %%
 

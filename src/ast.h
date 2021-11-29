@@ -35,9 +35,9 @@ enum {
 	stat_type_local_namelist_assgin_explist,
 	stat_type_while,
 
-	prefixexp_type_var,
-	prefixexp_type_functioncall,
-	prefixexp_type_op_exp_cp,
+	// prefixexp_type_var,
+	// prefixexp_type_functioncall,
+	// prefixexp_type_op_exp_cp,
 };
 
 typedef char name_t; 
@@ -307,6 +307,7 @@ stat_t *create_stat(int type,
 	, funcbody_t *
 	
 	, name_t *
+	, namelist_t *
 );
 
 elseiflist_t *create_elseiflist(elseiflist_t *, elseifpart_t *);
