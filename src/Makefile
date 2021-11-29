@@ -5,6 +5,7 @@ all: luam
 
 objs := token_name.o \
 	lua.yy.o \
+	ast.o \
 	lua.tab.o
 
 luam: ${objs}
