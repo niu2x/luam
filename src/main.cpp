@@ -20,9 +20,7 @@ int main(){
 	auto code = ss.str();
 
 	block_t *block =  luam_parse((char*)code.c_str());
-	if(block){
-		print_ast_root(block, std::cout);
-		destroy_block(block);
-	}
+	print_ast_root(block, std::cout);
+	destroy_block(block);
 	return 0;
 }

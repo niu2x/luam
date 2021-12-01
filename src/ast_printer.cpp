@@ -4,15 +4,6 @@ extern "C" {
 #include "lua.tab.h"
 }
 
-#include <map>
-#include <string>
-
-struct symbol_t {
-	std::string name;
-};
-
-static std::map<std::string, symbol_t> symtab;
-
 #define PRINT(type) static void print_ast(const type##_t* self, std::ostream &os)
 #define PRINT_SUB(name) if(self->name) {print_ast(self->name, os);}
 
@@ -47,8 +38,6 @@ PRINT(laststatpart);
 PRINT(name);
 PRINT(namelist);
 PRINT(parlist);
-PRINT(macro_stat);
-PRINT(macro_elsepart);
 PRINT(prefixexp);
 PRINT(stat);
 PRINT(statlist);
@@ -80,10 +69,8 @@ static int level = 0;
 }
 
 void print_ast_root(const block_t *block, std::ostream &os) {
-	symtab.clear();
 	level = 0;
 	print_ast(block, os);
-	symtab.clear();
 }
 
 PRINT(block) {
@@ -542,39 +529,9 @@ PRINT(statlist) {
 
 PRINT(statpart) {
 	newline();
-	if(self->stat){
-		PRINT_SUB(stat);
-		if(self->semicolon)
-			output(";");
-	}
-	else{
-		PRINT_SUB(macro_stat);
-	}
-}
-
-PRINT(macro_stat) {
-	switch(self->type){
-		case macro_stat_define: {
-			std::string name = self->name;
-			symtab[name] = {
-				.name = name,
-			};
-			break;
-		}
-		case macro_stat_ifdef: {
-			std::string name = self->name;
-			if(symtab.find(name) != symtab.end()){
-				PRINT_SUB(block);
-			}
-			else{
-				PRINT_SUB(macro_elsepart);
-			}
-		}
-	}
-}
-
-PRINT(macro_elsepart) {
-	PRINT_SUB(block);
+	PRINT_SUB(stat);
+	if(self->semicolon)
+		output(";");
 }
 
 PRINT(tableconstructor) {

@@ -49,10 +49,6 @@
 %token T_AND
 %token T_OR
 %token <sz> T_COMMENT
-%token TM_DEFINE
-%token TM_IFDEF
-%token TM_ENDIF
-%token TM_ELSE
 
 
 %{
@@ -103,8 +99,6 @@ extern block_t *root_block;
 	struct laststatpart_t *laststatpart;
 	struct chunk_t *chunk;
 	struct block_t *block;
-	struct macro_stat_t *macro_stat;
-	struct macro_elsepart_t *macro_elsepart;
 	struct functioncall_t *functioncall;
 	struct args_t *args;
 	double num;
@@ -149,8 +143,6 @@ extern block_t *root_block;
 %nterm <fieldlist> fieldlist
 %nterm <fieldsep> fieldsep
 %nterm <field> field
-%nterm <macro_stat> macro_stat
-%nterm <macro_elsepart> macro_elsepart
 
 %%
 
@@ -165,15 +157,8 @@ laststatpart: laststat { $$ = create_laststatpart($1, 0); }
 statlist:                { $$ = create_statlist(0, 0);}
 	| statlist statpart  { $$ = create_statlist($1, $2);}
 
-statpart: stat           { $$ = create_statpart($1, 0, 0);}
-	| stat T_SEMICOLON   { $$ = create_statpart($1, 1, 0);}
-	| macro_stat { $$ = create_statpart(0, 0, $1);}
-
-macro_stat: TM_DEFINE T_NAME 						{ $$ = create_macro_stat(macro_stat_define, $2, 0, 0);}
-	| TM_IFDEF T_NAME block macro_elsepart TM_ENDIF	{ $$ = create_macro_stat(macro_stat_ifdef, $2, $3, $4);}
-
-macro_elsepart: 	{ $$ = create_macro_elsepart(0);}
-	| TM_ELSE block 	{ $$ = create_macro_elsepart($2);}
+statpart: stat           { $$ = create_statpart($1, 0);}
+	| stat T_SEMICOLON   { $$ = create_statpart($1, 1);}
 
 laststat: T_RETURN       { $$ = create_laststat(laststat_type_return, 0);}
 	| T_RETURN explist   { $$ = create_laststat(laststat_type_return, $2);}

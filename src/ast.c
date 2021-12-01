@@ -18,23 +18,6 @@ chunk_t* create_chunk(statlist_t *statlist, laststatpart_t *laststatpart) {
 	return chunk ;
 }
 
-
-macro_stat_t* create_macro_stat(int type, name_t *name, block_t *block, macro_elsepart_t *elsepart) {
-	macro_stat_t *macro_stat = ALLOC(macro_stat_t) ;
-	macro_stat->type = type;
-	macro_stat->name = name;
-	macro_stat->block = block;
-	macro_stat->macro_elsepart = elsepart;
-	return macro_stat;
-}
-
-macro_elsepart_t* create_macro_elsepart(block_t *block) {
-	macro_elsepart_t *macro_elsepart = ALLOC(macro_elsepart_t) ;
-	macro_elsepart->block = block;
-	return macro_elsepart;
-}
-
-
 laststatpart_t* create_laststatpart(laststat_t *laststat, int semicolon) {
 	laststatpart_t *laststatpart = ALLOC(laststatpart_t) ;
 	laststatpart->laststat = laststat ;
@@ -50,11 +33,10 @@ statlist_t* create_statlist(statlist_t *statlist, statpart_t *statpart) {
 	return result ;
 }
 
-statpart_t* create_statpart(stat_t *stat, int semicolon, macro_stat_t *macro_stat) {
+statpart_t* create_statpart(stat_t *stat, int semicolon) {
 	statpart_t *result = ALLOC(statpart_t) ;
 	result->stat = stat ;
 	result->semicolon = semicolon ;
-	result->macro_stat = macro_stat;
 	return result ;
 }
 
@@ -340,20 +322,6 @@ DEF_DESTROY(args) {
 	FREE(args);
 }
 
-DEF_DESTROY(macro_elsepart) {
-	if(!macro_elsepart) return;
-	destroy_block(macro_elsepart->block);
-	FREE(macro_elsepart);
-}
-
-DEF_DESTROY(macro_stat) {
-	if(!macro_stat) return;
-	destroy_macro_elsepart(macro_stat->macro_elsepart);
-	destroy_block(macro_stat->block);
-	FREE(macro_stat->name);
-	FREE(macro_stat);
-}
-
 DEF_DESTROY(chunk) {
 	if(!chunk) return;
 	destroy_statlist(chunk->statlist);
@@ -597,7 +565,6 @@ DEF_DESTROY(statlist) {
 DEF_DESTROY(statpart) {
 	if(!statpart) return;
 	destroy_stat(statpart->stat);
-	destroy_macro_stat(statpart->macro_stat);
 	FREE(statpart);
 }
 

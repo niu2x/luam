@@ -35,9 +35,6 @@ enum {
 	stat_type_local_namelist_assgin_explist,
 	stat_type_while,
 
-	macro_stat_define,
-	macro_stat_ifdef,
-
 	// prefixexp_type_var,
 	// prefixexp_type_functioncall,
 	// prefixexp_type_op_exp_cp,
@@ -253,19 +250,7 @@ typedef struct laststat_t {
 	};
 } laststat_t;
 
-typedef struct macro_elsepart_t {
-	AST_FIELD(block);
-}macro_elsepart_t;
-
-typedef struct macro_stat_t {
-	int type;
-	name_t *name;
-	AST_FIELD(macro_elsepart);
-	AST_FIELD(block);
-} macro_stat_t;
-
 typedef struct statpart_t {
-	AST_FIELD(macro_stat);
 	AST_FIELD(stat)
 	int semicolon;
 }statpart_t;
@@ -289,9 +274,6 @@ typedef struct block_t{
 	AST_FIELD(chunk)
 } block_t;
 
-
-
-
 block_t* create_block(chunk_t *);
 
 chunk_t* create_chunk(statlist_t *, laststatpart_t *);
@@ -300,11 +282,7 @@ laststatpart_t* create_laststatpart(laststat_t *, int semicolon);
 
 statlist_t* create_statlist(statlist_t *, statpart_t *);
 
-statpart_t* create_statpart(stat_t *, int semicolon, macro_stat_t *);
-
-macro_stat_t* create_macro_stat(int type, name_t *, block_t *, macro_elsepart_t *);
-
-macro_elsepart_t* create_macro_elsepart(block_t *);
+statpart_t* create_statpart(stat_t *, int semicolon);
 
 laststat_t* create_laststat(int type, explist_t *);
 
@@ -399,8 +377,6 @@ DEF_DESTROY(elseiflist);
 DEF_DESTROY(elseifpart);
 DEF_DESTROY(elsepart);
 DEF_DESTROY(exp);
-DEF_DESTROY(macro_stat);
-DEF_DESTROY(macro_elsepart);
 DEF_DESTROY(exp0);
 DEF_DESTROY(exp1);
 DEF_DESTROY(exp2);
