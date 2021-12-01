@@ -85,6 +85,8 @@ extern int yyerror(char *message, ...);
 	
 %}
 
+%x MACRO
+
 %%
 
 ";" {return T_SEMICOLON;}
@@ -173,6 +175,18 @@ extern int yyerror(char *message, ...);
 
 	// return T_COMMENT;
 }
+
+"--#" {BEGIN(MACRO);}
+
+<MACRO>"define" {return TM_DEFINE;}
+<MACRO>"ifdef" {return TM_IFDEF;}
+<MACRO>"else" {return TM_ELSE;}
+<MACRO>"endif" {return TM_ENDIF;}
+<MACRO>" " {}
+<MACRO>[_a-zA-Z][_a-zA-Z0-9]* {yylval.sz = strdup(yytext); return T_NAME;}
+
+
+<MACRO>"\n" {BEGIN(INITIAL);}
 
 "--" {
 	//buffer_init(&str);
@@ -263,7 +277,10 @@ extern int yyerror(char *message, ...);
 
 %%
 
+static int had_error = 0;
+
 int yyerror(char *message, ...) {
+	had_error = 1;
 	va_list ap;
 	va_start(ap, message);
 	int n = vfprintf(stderr, message, ap);
@@ -275,8 +292,15 @@ block_t *root_block = 0;
 
 block_t *luam_parse(char *sz) {
 	root_block = 0;
+	had_error = 0;
 	YY_BUFFER_STATE bs = yy_scan_string(sz);
 	yyparse();
 	yy_delete_buffer(bs);
+
+	if(had_error){
+		destroy_block(root_block);
+		root_block = 0;
+	}
+
 	return root_block;
 }
