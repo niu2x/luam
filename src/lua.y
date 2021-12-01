@@ -1,5 +1,5 @@
 %token <sz> T_NAME 
-%token <num> T_NUMBER 
+%token <sz> T_NUMBER 
 %token <sz> T_STRING 
 %token T_SEMICOLON
 %token T_RETURN
@@ -54,6 +54,8 @@
 
 #include "luam.h"
 #include "ast.h"
+
+extern block_t *root_block;
 
 %}
 
@@ -143,7 +145,7 @@
 
 %%
 
-block: chunk { $$ = create_block($1); }
+block: chunk { $$ = create_block($1); root_block = $$;}
 
 chunk: statlist laststatpart { $$ = create_chunk($1, $2); }
 	| statlist { $$ = create_chunk($1, 0); }
@@ -197,7 +199,7 @@ funcnamememberpart: T_DOT T_NAME   { $$ = create_funcnamememberpart($2);}
 funcnamelastmemberpart:    { $$ = create_funcnamelastmemberpart(0);}
 	| T_COLON T_NAME   { $$ = create_funcnamelastmemberpart($2);}
 
-varlist: var  { $$ = create_varlist(0, 0);}
+varlist: var  { $$ = create_varlist($1, 0);}
 	| varlist T_COMMA var  { $$ = create_varlist($3, $1);}
 
 var: T_NAME                       { $$ = create_var($1, 0, 0);}
@@ -244,15 +246,15 @@ exp5: exp6 					{ $$ = create_exp5($1, 0, 0);}
 exp6: expterm   			{ $$ = create_exp6($1, 0);}
 	| exp6 T_POW expterm    { $$ = create_exp6($3, $1);}
 
-expterm: T_NIL 				{ $$ = create_expterm(expterm_type_nil, 0, 0, 0, 0, 0);}
-	| T_FALSE				{ $$ = create_expterm(expterm_type_false, 0, 0, 0, 0, 0);}
-	| T_TRUE 				{ $$ = create_expterm(expterm_type_true, 0, 0, 0, 0, 0);}
-	| T_NUMBER     			{ $$ = create_expterm(expterm_type_number, $1, 0, 0, 0, 0);}
-	| T_STRING    			{ $$ = create_expterm(expterm_type_string, 0, $1, 0, 0, 0);}
-	| T_VARGS               { $$ = create_expterm(expterm_type_vargs, 0, 0, 0, 0, 0);}
-	| function 				{ $$ = create_expterm(expterm_type_function, 0, 0, $1, 0, 0);}
-	| prefixexp             { $$ = create_expterm(expterm_type_prefixexp, 0, 0, 0, $1, 0);}
-	| tableconstructor      { $$ = create_expterm(expterm_type_tableconstructor, 0, 0, 0, 0, $1);}
+expterm: T_NIL 				{ $$ = create_expterm(expterm_type_nil, 0, 0, 0, 0);}
+	| T_FALSE				{ $$ = create_expterm(expterm_type_false, 0, 0, 0, 0);}
+	| T_TRUE 				{ $$ = create_expterm(expterm_type_true, 0, 0, 0, 0);}
+	| T_NUMBER     			{ $$ = create_expterm(expterm_type_number, $1, 0, 0, 0);}
+	| T_STRING    			{ $$ = create_expterm(expterm_type_string, $1, 0, 0, 0);}
+	| T_VARGS               { $$ = create_expterm(expterm_type_vargs, 0, 0, 0, 0);}
+	| function 				{ $$ = create_expterm(expterm_type_function, 0, $1, 0, 0);}
+	| prefixexp             { $$ = create_expterm(expterm_type_prefixexp, 0, 0, $1, 0);}
+	| tableconstructor      { $$ = create_expterm(expterm_type_tableconstructor, 0, 0, 0, $1);}
 
 functioncall: prefixexp args  		{ $$ = create_functioncall($1, $2, 0);}
 	| prefixexp T_COLON T_NAME args { $$ = create_functioncall($1, $4, $3);}

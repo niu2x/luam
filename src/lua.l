@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include "lua.tab.h"
 #include "luam.h"
+#include "ast.h"
 
 #define MY_MAX(x, y) (x) > (y) ? (x) : (y)
 
@@ -183,9 +184,9 @@ extern int yyerror(char *message, ...);
 	if(eof) yyterminate();
 }
 
-[_a-zA-Z][_a-zA-Z0-9]* {return T_NAME;}
-[-]?(0x[0-9a-fA-F]+)|([0-9]+("."[0-9]*)?("e"([+-])?[0-9]+)?) {return T_NUMBER;}
-[-]?"."([0-9]+)?("e"([+-])?[0-9]+)? {return T_NUMBER;}
+[_a-zA-Z][_a-zA-Z0-9]* {yylval.sz = strdup(yytext); return T_NAME;}
+[-]?(0x[0-9a-fA-F]+)|([0-9]+("."[0-9]*)?("e"([+-])?[0-9]+)?) { yylval.sz = strdup(yytext); return T_NUMBER;}
+[-]?"."([0-9]+)?("e"([+-])?[0-9]+)? {yylval.sz = strdup(yytext); return T_NUMBER;}
 ("\"")|("\'")|("["=*"[")  {
 	str_pattern = strdup(yytext);
 	str_temp = strdup(yytext);
@@ -193,12 +194,18 @@ extern int yyerror(char *message, ...);
 	str_temp_size = 0;
 	last_char_is_escaped = 0;
 	buffer_init(&str);
+
+	for(int i = 0; i < str_pattern_size; i ++)
+		buffer_push(&str, str_pattern[i]);
+
 	//printf("str begin %d %s\n", yylineno, str_pattern);
 
 	if(str_pattern_size >= 2) {
 		str_pattern[0] = ']';
 		str_pattern[str_pattern_size-1] = ']';
 	}
+
+
 
 	int eof = 0;
 	while((!eof) && str_temp_size < str_pattern_size){ 
@@ -219,14 +226,21 @@ extern int yyerror(char *message, ...);
 		//printf("str_temp %s\n", str_temp);
 		//printf("eof %d %x\n", eof, last_char);
 	}
+
+	for(int i = 0; i < str_pattern_size; i ++)
+		buffer_push(&str, str_pattern[i]);
+		
 	buffer_push(&str, 0);
+
 
 	free(str_pattern);
 	free(str_temp);
 	//printf("got str: %s\n", str.base);
-	buffer_free(&str);
 
 	if(eof) yyterminate();
+
+	yylval.sz = strdup(str.base);
+	buffer_free(&str);
 
 	return T_STRING;
 }
@@ -247,32 +261,12 @@ int yyerror(char *message, ...) {
 	return n;
 } 
 
+block_t *root_block = 0;
 
-int main() {
-		
-	struct buffer_t input;
-	buffer_init(&input);
-
-	int c = fgetc(stdin);
-	while(!feof(stdin)) {
-		buffer_push(&input, c);
-		c = fgetc(stdin);
-	}
-	buffer_push(&input, 0);
-
-	YY_BUFFER_STATE bs = yy_scan_string(input.base);
-
-	int token;
-
-	//while(token = yylex()) {
-	//	 printf("token %s\n", token_name(token));
-	//}
-
+block_t *luam_parse(char *sz) {
+	root_block = 0;
+	YY_BUFFER_STATE bs = yy_scan_string(sz);
 	yyparse();
-
 	yy_delete_buffer(bs);
-
-	buffer_free(&input);
-
-	return 0;
+	return root_block;
 }

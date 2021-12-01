@@ -224,10 +224,9 @@ exp6_t* create_exp6(expterm_t *expterm, exp6_t *exp6) {
 	return result ;
 }
 
-expterm_t* create_expterm(int type, double num, char *sz, function_t *function, prefixexp_t *prefixexp, tableconstructor_t *tableconstructor) {
+expterm_t* create_expterm(int type, char *sz, function_t *function, prefixexp_t *prefixexp, tableconstructor_t *tableconstructor) {
 	expterm_t *expterm = ALLOC(expterm_t) ;
 	expterm->type = type ;
-	expterm->num = num ;
 	expterm->sz = sz ;
 	expterm->function = function ;
 	expterm->prefixexp = prefixexp ;
@@ -306,4 +305,286 @@ field_t* create_field(exp_t *exp, exp_t *name_exp, name_t *name) {
 	field->name_exp = name_exp ;
 	field->name = name ;
 	return field ;
+}
+
+
+DEF_DESTROY(block) {
+	if(!block) return;
+	destroy_chunk(block->chunk);
+	FREE(block);
+}
+
+DEF_DESTROY(args) {
+	if(!args) return;
+	destroy_tableconstructor(args->tableconstructor);
+	destroy_explist(args->explist);
+	FREE(args->sz);
+	FREE(args);
+}
+
+DEF_DESTROY(chunk) {
+	if(!chunk) return;
+	destroy_statlist(chunk->statlist);
+	destroy_laststatpart(chunk->laststatpart);
+	FREE(chunk);
+}
+
+DEF_DESTROY(elseiflist) {
+	if(!elseiflist) return;
+	destroy_elseifpart(elseiflist->elseifpart);
+	destroy_elseiflist(elseiflist->elseiflist);
+	FREE(elseiflist);
+}
+
+DEF_DESTROY(elseifpart) {
+	if(!elseifpart) return;
+	destroy_exp(elseifpart->exp);
+	destroy_block(elseifpart->block);
+	FREE(elseifpart);
+}
+
+DEF_DESTROY(elsepart) {
+	if(!elsepart) return;
+	destroy_block(elsepart->block);
+	FREE(elsepart);
+}
+
+DEF_DESTROY(exp) {
+	if(!exp) return;
+	destroy_exp(exp->left);
+	destroy_exp0(exp->right);
+	FREE(exp);
+}
+
+DEF_DESTROY(exp0) {
+	if(!exp0) return;
+	destroy_exp0(exp0->left);
+	destroy_exp1(exp0->right);
+	FREE(exp0);
+}
+
+DEF_DESTROY(exp1) {
+	if(!exp1) return;
+	destroy_exp1(exp1->left);
+	destroy_exp2(exp1->right);
+	FREE(exp1);
+}
+
+DEF_DESTROY(exp2) {
+	if(!exp2) return;
+	destroy_exp2(exp2->left);
+	destroy_exp3(exp2->right);
+	FREE(exp2);
+}	
+
+DEF_DESTROY(exp3) {
+	if(!exp3) return;
+	destroy_exp3(exp3->left);
+	destroy_exp4(exp3->right);
+	FREE(exp3);
+}
+
+DEF_DESTROY(exp4) {
+	if(!exp4) return;
+	destroy_exp4(exp4->left);
+	destroy_exp5(exp4->right);
+	FREE(exp4);
+}
+
+DEF_DESTROY(exp5) {
+	if(!exp5) return;
+	destroy_exp5(exp5->exp5);
+	destroy_exp6(exp5->exp6);
+	FREE(exp5);
+}
+
+DEF_DESTROY(exp6) {
+	if(!exp6) return;
+	destroy_exp6(exp6->left);
+	destroy_expterm(exp6->right);
+	FREE(exp6);
+}
+
+DEF_DESTROY(explist) {
+	if(!explist) return;
+	destroy_explist(explist->explist);
+	destroy_exp(explist->exp);
+	FREE(explist);
+}
+
+DEF_DESTROY(expterm) {
+	if(!expterm) return;
+	FREE(expterm->sz);
+
+	destroy_function(expterm->function);
+	destroy_prefixexp(expterm->prefixexp);
+	destroy_tableconstructor(expterm->tableconstructor);
+
+	FREE(expterm);
+}
+
+DEF_DESTROY(field) {
+	if(!field) return;
+	FREE(field->name);
+	destroy_exp(field->name_exp);
+	destroy_exp(field->exp);
+
+	FREE(field);
+}
+
+DEF_DESTROY(fieldlist) {
+	if(!fieldlist) return;
+	destroy_fieldsep(fieldlist->fieldsep);
+	destroy_fieldlistnotailfieldseq(fieldlist->fieldlistnotailfieldseq);
+	FREE(fieldlist);
+}
+
+DEF_DESTROY(fieldlistnotailfieldseq) {
+	if(!fieldlistnotailfieldseq) return;
+	destroy_fieldlistnotailfieldseq(fieldlistnotailfieldseq->fieldlistnotailfieldseq);
+	destroy_field(fieldlistnotailfieldseq->field);
+	destroy_fieldsep(fieldlistnotailfieldseq->fieldsep);
+	FREE(fieldlistnotailfieldseq);
+}
+
+DEF_DESTROY(fieldsep) {
+	if(!fieldsep) return;
+	FREE(fieldsep);
+}
+
+DEF_DESTROY(funcbody) {
+	if(!funcbody) return;
+	destroy_parlist(funcbody->parlist);
+	destroy_block(funcbody->block);
+	FREE(funcbody);
+}
+
+DEF_DESTROY(funcname) {
+	if(!funcname) return;
+	FREE(funcname->name);
+	destroy_funcnamememberlist (funcname->funcnamememberlist);
+	destroy_funcnamelastmemberpart (funcname->funcnamelastmemberpart);
+
+	FREE(funcname);
+}
+
+DEF_DESTROY(funcnamelastmemberpart) {
+	if(!funcnamelastmemberpart) return;
+	FREE(funcnamelastmemberpart->name);
+	FREE(funcnamelastmemberpart);
+}
+
+DEF_DESTROY(funcnamememberlist) {
+	if(!funcnamememberlist) return;
+
+	destroy_funcnamememberlist(funcnamememberlist->funcnamememberlist);
+	destroy_funcnamememberpart(funcnamememberlist->funcnamememberpart);
+
+	FREE(funcnamememberlist);
+}
+
+DEF_DESTROY(funcnamememberpart) {
+	if(!funcnamememberpart) return;
+	FREE(funcnamememberpart->name);
+	FREE(funcnamememberpart);
+}
+
+DEF_DESTROY(function) {
+	if(!function) return;
+	destroy_funcbody(function->funcbody);
+	FREE(function);
+}
+
+DEF_DESTROY(functioncall) {
+	if(!functioncall) return;
+	destroy_prefixexp(functioncall->prefixexp);
+	destroy_args(functioncall->args);
+	FREE(functioncall->name);
+	FREE(functioncall);
+}
+
+DEF_DESTROY(laststat) {
+	if(!laststat) return;
+	destroy_explist(laststat->explist);
+	FREE(laststat);
+}
+
+DEF_DESTROY(laststatpart) {
+	if(!laststatpart) return;
+	destroy_laststat(laststatpart->laststat);
+	FREE(laststatpart);
+}
+
+DEF_DESTROY(namelist) {
+	if(!namelist) return;
+	FREE(namelist->name);
+	destroy_namelist(namelist->namelist);
+	FREE(namelist);
+}
+
+DEF_DESTROY(parlist) {
+	if(!parlist) return;
+	destroy_namelist(parlist->namelist);
+	FREE(parlist);
+}
+
+DEF_DESTROY(prefixexp) {
+	if(!prefixexp) return;
+	destroy_var(prefixexp->var);
+	destroy_functioncall(prefixexp->functioncall);
+	destroy_exp(prefixexp->exp);
+	FREE(prefixexp);
+}
+
+DEF_DESTROY(stat) {
+	if(!stat) return;
+	destroy_varlist(stat->varlist);
+	destroy_explist(stat->explist);
+	destroy_functioncall(stat->functioncall);
+	destroy_block(stat->block);
+	destroy_exp(stat->exp);
+	destroy_elseiflist(stat->elseiflist);
+	destroy_elsepart(stat->elsepart);
+	destroy_exp(stat->exp0);
+	destroy_exp(stat->exp1);
+	destroy_exp(stat->exp2);
+	destroy_funcname(stat->funcname);
+	destroy_funcbody(stat->funcbody);
+	FREE(stat->name);
+	destroy_namelist(stat->namelist);
+	FREE(stat);
+}
+
+DEF_DESTROY(statlist) {
+	if(!statlist) return;
+	destroy_statlist(statlist->statlist);
+	destroy_statpart(statlist->statpart);
+	FREE(statlist);
+}
+
+DEF_DESTROY(statpart) {
+	if(!statpart) return;
+	destroy_stat(statpart->stat);
+	FREE(statpart);
+}
+
+DEF_DESTROY(tableconstructor) {
+	if(!tableconstructor) return;
+	destroy_fieldlist(tableconstructor->fieldlist);
+	FREE(tableconstructor);
+}
+
+DEF_DESTROY(var) {
+	if(!var) return;
+	FREE(var->name);
+	destroy_prefixexp(var->prefixexp);
+	destroy_exp(var->exp);
+	FREE(var);
+}
+
+DEF_DESTROY(varlist) {
+	if(!varlist) return;
+	destroy_varlist(varlist->varlist);
+	destroy_var(varlist->var);
+	FREE(varlist);
 }

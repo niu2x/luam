@@ -107,7 +107,6 @@ typedef struct expterm_t {
 		AST_FIELD(function)
 		AST_FIELD(prefixexp)
 		AST_FIELD(tableconstructor)
-		double num;
 		char *sz;
 	};
 
@@ -345,7 +344,7 @@ exp4_t* create_exp4(exp5_t *, exp4_t *, int type);
 exp5_t* create_exp5(exp6_t *, exp5_t *, int type);
 exp6_t* create_exp6(expterm_t *, exp6_t *);
 
-expterm_t* create_expterm(int type, double num, char *sz, function_t *, prefixexp_t *, tableconstructor_t *);
+expterm_t* create_expterm(int type,  char *sz, function_t *, prefixexp_t *, tableconstructor_t *);
 
 functioncall_t *create_functioncall(prefixexp_t *, args_t *, name_t *);
 
@@ -366,5 +365,51 @@ fieldlistnotailfieldseq_t* create_fieldlistnotailfieldseq(field_t *, fieldlistno
 fieldsep_t *create_fieldsep(int);
 
 field_t* create_field(exp_t*, exp_t *name_exp, name_t *);
+
+
+#define DEF_DESTROY(type) void destroy_##type(type##_t *type)
+
+
+DEF_DESTROY(args);
+DEF_DESTROY(block);
+DEF_DESTROY(chunk);
+DEF_DESTROY(elseiflist);
+DEF_DESTROY(elseifpart);
+DEF_DESTROY(elsepart);
+DEF_DESTROY(exp);
+DEF_DESTROY(exp0);
+DEF_DESTROY(exp1);
+DEF_DESTROY(exp2);
+DEF_DESTROY(exp3);
+DEF_DESTROY(exp4);
+DEF_DESTROY(exp5);
+DEF_DESTROY(exp6);
+DEF_DESTROY(explist);
+DEF_DESTROY(expterm);
+DEF_DESTROY(field);
+DEF_DESTROY(fieldlist);
+DEF_DESTROY(fieldlistnotailfieldseq);
+DEF_DESTROY(fieldsep);
+DEF_DESTROY(funcbody);
+DEF_DESTROY(funcname);
+DEF_DESTROY(funcnamelastmemberpart);
+DEF_DESTROY(funcnamememberlist);
+DEF_DESTROY(funcnamememberpart);
+DEF_DESTROY(function);
+DEF_DESTROY(functioncall);
+DEF_DESTROY(laststat);
+DEF_DESTROY(laststatpart);
+DEF_DESTROY(name);
+DEF_DESTROY(namelist);
+DEF_DESTROY(parlist);
+DEF_DESTROY(prefixexp);
+DEF_DESTROY(stat);
+DEF_DESTROY(statlist);
+DEF_DESTROY(statpart);
+DEF_DESTROY(tableconstructor);
+DEF_DESTROY(var);
+DEF_DESTROY(varlist);
+
+block_t *luam_parse(char *);
 
 #endif
