@@ -3,4 +3,3 @@ src/luam
 *.lex.c
 *.tab.*
 *.lua
-luac.out
