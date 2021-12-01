@@ -53,8 +53,7 @@
 %token TM_IFDEF
 %token TM_ENDIF
 %token TM_ELSE
-%token TM_MACRO_DEV_START 
-%token TM_MACRO_DEV_END
+
 
 %{
 
@@ -172,7 +171,6 @@ statpart: stat           { $$ = create_statpart($1, 0, 0);}
 
 macro_stat: TM_DEFINE T_NAME 						{ $$ = create_macro_stat(macro_stat_define, $2, 0, 0);}
 	| TM_IFDEF T_NAME block macro_elsepart TM_ENDIF	{ $$ = create_macro_stat(macro_stat_ifdef, $2, $3, $4);}
-	| TM_MACRO_DEV_START block TM_MACRO_DEV_END		{ $$ = create_macro_stat(macro_stat_macro_dev_condition, 0, $2, 0);}
 
 macro_elsepart: 	{ $$ = create_macro_elsepart(0);}
 	| TM_ELSE block 	{ $$ = create_macro_elsepart($2);}
