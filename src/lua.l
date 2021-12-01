@@ -89,6 +89,8 @@ extern int yyerror(char *message, ...);
 
 %%
 
+"MACRO_DEV_START()" {return TM_MACRO_DEV_START;}
+"MACRO_DEV_END()" {return TM_MACRO_DEV_END;}
 ";" {return T_SEMICOLON;}
 ":" {return T_COLON;}
 "return" {return T_RETURN;}
@@ -184,8 +186,8 @@ extern int yyerror(char *message, ...);
 <MACRO>"endif" {return TM_ENDIF;}
 <MACRO>" " {}
 <MACRO>[_a-zA-Z][_a-zA-Z0-9]* {yylval.sz = strdup(yytext); return T_NAME;}
-
-
+<MACRO>"\r" {}
+<MACRO>. {yyerror("unexpected: %s line: %d\n", yytext, yylineno);}
 <MACRO>"\n" {BEGIN(INITIAL);}
 
 "--" {
@@ -291,6 +293,7 @@ int yyerror(char *message, ...) {
 block_t *root_block = 0;
 
 block_t *luam_parse(char *sz) {
+	yylineno = 1;
 	root_block = 0;
 	had_error = 0;
 	YY_BUFFER_STATE bs = yy_scan_string(sz);

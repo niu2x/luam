@@ -569,6 +569,13 @@ PRINT(macro_stat) {
 			else{
 				PRINT_SUB(macro_elsepart);
 			}
+			break;
+		}
+		case macro_stat_macro_dev_condition: {
+			std::string name = "DEV";
+			if(symtab.find(name) != symtab.end()){
+				PRINT_SUB(block);
+			}
 		}
 	}
 }

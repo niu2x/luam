@@ -37,6 +37,7 @@ enum {
 
 	macro_stat_define,
 	macro_stat_ifdef,
+	macro_stat_macro_dev_condition,
 
 	// prefixexp_type_var,
 	// prefixexp_type_functioncall,
