@@ -48,6 +48,7 @@
 %token T_NE
 %token T_AND
 %token T_OR
+%token <sz> T_COMMENT
 
 
 %{

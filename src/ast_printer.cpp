@@ -79,9 +79,11 @@ PRINT(block) {
 
 PRINT(args) {
 	if(self->sz) {
+		output(" ");
 		output(self->sz);
 	}
 	else if(self->tableconstructor){
+		output(" ");
 		PRINT_SUB(tableconstructor);
 	}
 	else{
@@ -165,7 +167,7 @@ PRINT(exp1) {
 PRINT(exp2) {
 	if(self->left) {
 		PRINT_SUB(left);
-		output("..");
+		output(" .. ");
 	}
 	PRINT_SUB(right);
 }	
@@ -372,6 +374,7 @@ PRINT(laststat) {
 }
 
 PRINT(laststatpart) {
+	newline();
 	PRINT_SUB(laststat);
 	if(self->semicolon)
 		output(";");
@@ -436,7 +439,6 @@ PRINT(stat) {
 			newline_pop();
 			output("until ");
 			PRINT_SUB(exp);
-			output(" end");
 			break;
 		case stat_type_if:
 			output("if ");

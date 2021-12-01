@@ -170,18 +170,26 @@ extern int yyerror(char *message, ...);
 	if(eof) yyterminate();
 
 	//printf("comment: %s\n", yytext);
+
+	// return T_COMMENT;
 }
 
 "--" {
+	//buffer_init(&str);
 	int eof = 0;
 	int c = input();
 	if(!c) eof = 1;
 	while((!eof) && c != '\n'){
 		c = input();
+		//buffer_push(&str, c);
 		if(!c) eof = 1;
 	}
 	//printf("comment: %s\n", yytext);
 	if(eof) yyterminate();
+
+	// yylval.sz = strdup(str.base);
+	// buffer_free(&str);
+	// return T_COMMENT;
 }
 
 [_a-zA-Z][_a-zA-Z0-9]* {yylval.sz = strdup(yytext); return T_NAME;}
@@ -216,6 +224,8 @@ extern int yyerror(char *message, ...);
 	//printf("str_pattern %s\n", str_pattern);
 	//printf("str_temp %s\n", str_temp);
 	while ((!eof) && (strcmp(str_pattern, str_temp) != 0 || (last_char_is_escaped && str_pattern_size == 1))){
+		if(last_char_is_escaped)
+			buffer_push(&str, '\\');
 		buffer_push(&str, str_temp[0]);
 		str_shift();
 		if(str_read_char()) {
