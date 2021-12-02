@@ -178,7 +178,7 @@ extern int yyerror(char *message, ...);
 	// return T_COMMENT;
 }
 
-"--#" {BEGIN(MACRO);}
+"--##" {BEGIN(MACRO);}
 
 <MACRO>"define" {return TM_DEFINE;}
 <MACRO>"ifdef" {return TM_IFDEF;}
