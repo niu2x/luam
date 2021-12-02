@@ -1,5 +1,5 @@
 *.o
-src/luam
+luam/luam
 *.lex.c
 *.tab.*
 *.lua
