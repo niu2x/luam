@@ -29,3 +29,10 @@ ${objs}: lua.tab.h
 
 %.yy.c: %.l
 	flex -o $@ $<
+
+
+clean:
+	rm -rf *.o
+	rm -rf luam
+	rm -rf *.yy.*
+	rm -rf *.tab.*
