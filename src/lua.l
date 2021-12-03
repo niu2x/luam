@@ -70,6 +70,7 @@ static int str_read_char() {
 	if(last_char_is_escaped && c) {
 		c = input();
 	}
+	if(char_is_escaped)
 	char_is_escaped[str_temp_size] = last_char_is_escaped;
 	str_temp[str_temp_size ++] = c;
 	return !c;
@@ -79,6 +80,7 @@ static int str_read_char() {
 static void str_shift() {
 	for(int i = 0; i < str_temp_size - 1; i ++){
 		str_temp[i] = str_temp[i+1];
+		if(char_is_escaped)
 		char_is_escaped[i] = char_is_escaped[i+1];
 	}
 	-- str_temp_size;
@@ -176,7 +178,7 @@ extern int yyerror(char *message, ...);
 
 	if(eof) yyterminate();
 
-	//printf("comment: %s\n", yytext);
+	; printf("comment: %s\n", yytext);
 
 	// return T_COMMENT;
 }
@@ -266,6 +268,7 @@ extern int yyerror(char *message, ...);
 	free(str_pattern);
 	free(str_temp);
 	free(char_is_escaped);
+	char_is_escaped = 0;
 	//printf("got str: %s\n", str.base);
 
 	if(eof) yyterminate();
