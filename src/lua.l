@@ -178,7 +178,7 @@ extern int yyerror(char *message, ...);
 
 	if(eof) yyterminate();
 
-	; printf("comment: %s\n", yytext);
+	// printf("comment: %s\n", yytext);
 
 	// return T_COMMENT;
 }
