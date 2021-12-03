@@ -18,6 +18,7 @@ static int input();
 static char * str_pattern = 0;
 static int str_pattern_size = 0;
 static char * str_temp = 0;
+static char * char_is_escaped = 0;
 static int str_temp_size = 0;
 static char last_char_is_escaped = 0;
 
@@ -69,6 +70,7 @@ static int str_read_char() {
 	if(last_char_is_escaped && c) {
 		c = input();
 	}
+	char_is_escaped[str_temp_size] = last_char_is_escaped;
 	str_temp[str_temp_size ++] = c;
 	return !c;
 }
@@ -77,6 +79,7 @@ static int str_read_char() {
 static void str_shift() {
 	for(int i = 0; i < str_temp_size - 1; i ++){
 		str_temp[i] = str_temp[i+1];
+		char_is_escaped[i] = char_is_escaped[i+1];
 	}
 	-- str_temp_size;
 }
@@ -229,7 +232,8 @@ extern int yyerror(char *message, ...);
 		str_pattern[str_pattern_size-1] = ']';
 	}
 
-
+	char_is_escaped = strdup(str_pattern);
+	memset(char_is_escaped, 0, str_pattern_size);
 
 	int eof = 0;
 	while((!eof) && str_temp_size < str_pattern_size){ 
@@ -238,9 +242,9 @@ extern int yyerror(char *message, ...);
 		}
 	}
 	//printf("str_pattern %s\n", str_pattern);
-	//printf("str_temp %s\n", str_temp);
+	//printf("str_temp %s %d\n", str_temp);
 	while ((!eof) && (strcmp(str_pattern, str_temp) != 0 || (last_char_is_escaped && str_pattern_size == 1))){
-		if(last_char_is_escaped)
+		if(char_is_escaped[0])
 			buffer_push(&str, '\\');
 		buffer_push(&str, str_temp[0]);
 		str_shift();
@@ -261,6 +265,7 @@ extern int yyerror(char *message, ...);
 
 	free(str_pattern);
 	free(str_temp);
+	free(char_is_escaped);
 	//printf("got str: %s\n", str.base);
 
 	if(eof) yyterminate();
