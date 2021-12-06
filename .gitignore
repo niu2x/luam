@@ -2,4 +2,3 @@
 luam/luam
 *.lex.c
 *.tab.*
-*.lua

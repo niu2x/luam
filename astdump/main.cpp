@@ -101,7 +101,7 @@ json print_ast_root(const block_t* block, std::ostream& os)
 PRINT(block) { 
     return {
         {"type", "block"},
-        {"block", PRINT_SUB(chunk)},
+        {"chunk", PRINT_SUB(chunk)},
     }; 
 }
 
