@@ -1,3 +1,6 @@
+#define LUAM_HOOK_LINE
+#define LUAM_HOOK_FUNCTION
+
 #include "ast_printer.h"
 
 #include <string.h>
@@ -115,6 +118,7 @@ PRINT(args) {
 }
 
 static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, int lineno){
+	#if defined(LUAM_HOOK_FUNCTION)
 	if(is_funcbody){
 		newline();
 		output("____MYG.enter_lua_function('");
@@ -124,13 +128,17 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 		output(");");
 		newline();
 	}
+	#endif
+
 	PRINT_SUB(statlist);
 
+	#if defined(LUAM_HOOK_FUNCTION)
 	if(is_funcbody){
 		newline();
 		output("____MYG.exit_lua_function();");
 		newline();
 	}
+	#endif
 
 	PRINT_SUB(laststatpart);
 	
@@ -574,7 +582,9 @@ PRINT(statpart) {
 		if(self->semicolon)
 			output(";");
 		newline();
+		#if defined(LUAM_HOOK_LINE)
 		output("____MYG.lua_line = ____MYG.lua_line + 1;");
+		#endif
 		newline();
 	}
 	else{
