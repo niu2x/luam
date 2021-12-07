@@ -88,6 +88,7 @@ stat_t *create_stat(int type,
 	, funcbody_t *funcbody
 	, name_t *name
 	, namelist_t *namelist
+	, int lineno
 ) {
 	stat_t *stat = ALLOC(stat_t) ;
 	stat->type = type ;
@@ -105,6 +106,7 @@ stat_t *create_stat(int type,
 	stat->funcbody = funcbody ;
 	stat->name = name ;
 	stat->namelist = namelist ;
+	stat->lineno = lineno ;
 	return stat ;
 }
 
@@ -268,9 +270,10 @@ args_t *create_args(explist_t *explist, tableconstructor_t *tableconstructor, ch
 	return args ;
 }
 
-function_t* create_function(funcbody_t *funcbody) {
+function_t* create_function(funcbody_t *funcbody, int lineno) {
 	function_t *function = ALLOC(function_t) ;
 	function->funcbody = funcbody ;
+	function->lineno = lineno;
 	return function ;
 }
 

@@ -16,7 +16,7 @@
 %token T_FOR
 %token T_IN
 %token T_COMMA
-%token T_FUNCTION
+%token <lineno> T_FUNCTION
 %token T_LOCAL
 %token T_DOT
 %token T_COLON
@@ -110,6 +110,7 @@ extern block_t *root_block;
 	struct args_t *args;
 	double num;
 	char *sz;
+	int lineno;
 }
 
 %nterm <block> block
@@ -185,19 +186,19 @@ prefixexp: var   			{ $$ = create_prefixexp($1, 0, 0);}
 	| functioncall          { $$ = create_prefixexp(0, $1, 0);}
 	| T_OP exp T_CP         { $$ = create_prefixexp(0, 0, $2);}
 	
-stat: varlist T_ASSIGN explist { $$ = create_stat(stat_type_varlist_assgin_explist, $1, $3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| functioncall { $$ = create_stat(stat_type_functioncall, 0, 0, $1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| T_DO block T_END { $$ = create_stat(stat_type_do_block_end, 0, 0, 0, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| T_REPEAT block T_UNTIL exp { $$ = create_stat(stat_type_repeat_block_until_end, 0, 0, 0, $2, $4, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
-	| T_IF exp T_THEN block elseiflist elsepart T_END { $$ = create_stat(stat_type_if, 0, 0, 0, $4, $2, $5, $6, 0, 0, 0, 0, 0, 0, 0);}
-	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop, 0, 0, 0, $8, 0, 0, 0, $4, $6, 0, 0, 0, $2, 0);}
-	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop_step, 0, 0, 0, $10, 0, 0, 0, $4, $6, $8, 0, 0, $2, 0);}
-	| T_FOR namelist T_IN explist T_DO block T_END { $$ = create_stat(stat_type_for_in, 0, $4, 0, $6, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2);}
-	| T_FUNCTION funcname funcbody { $$ = create_stat(stat_type_function, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2, $3, 0, 0);}
-	| T_LOCAL T_FUNCTION T_NAME funcbody { $$ = create_stat(stat_type_local_function, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $4, $3, 0);}
-	| T_LOCAL namelist { $$ = create_stat(stat_type_local_namelist, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2);}
-	| T_LOCAL namelist T_ASSIGN explist { $$ = create_stat(stat_type_local_namelist_assgin_explist, 0, $4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2);}
-	| T_WHILE exp T_DO block T_END { $$ = create_stat(stat_type_while, 0, 0, 0, $4, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0);}
+stat: varlist T_ASSIGN explist { $$ = create_stat(stat_type_varlist_assgin_explist, $1, $3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1);}
+	| functioncall { $$ = create_stat(stat_type_functioncall, 0, 0, $1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1);}
+	| T_DO block T_END { $$ = create_stat(stat_type_do_block_end, 0, 0, 0, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1);}
+	| T_REPEAT block T_UNTIL exp { $$ = create_stat(stat_type_repeat_block_until_end, 0, 0, 0, $2, $4, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1);}
+	| T_IF exp T_THEN block elseiflist elsepart T_END { $$ = create_stat(stat_type_if, 0, 0, 0, $4, $2, $5, $6, 0, 0, 0, 0, 0, 0, 0, -1);}
+	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop, 0, 0, 0, $8, 0, 0, 0, $4, $6, 0, 0, 0, $2, 0, -1);}
+	| T_FOR T_NAME T_ASSIGN exp T_COMMA exp T_COMMA exp T_DO block T_END { $$ = create_stat(stat_type_for_loop_step, 0, 0, 0, $10, 0, 0, 0, $4, $6, $8, 0, 0, $2, 0, -1);}
+	| T_FOR namelist T_IN explist T_DO block T_END { $$ = create_stat(stat_type_for_in, 0, $4, 0, $6, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2, -1);}
+	| T_FUNCTION funcname funcbody { $$ = create_stat(stat_type_function, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2, $3, 0, 0, $1);}
+	| T_LOCAL T_FUNCTION T_NAME funcbody { $$ = create_stat(stat_type_local_function, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $4, $3, 0, $2);}
+	| T_LOCAL namelist { $$ = create_stat(stat_type_local_namelist, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2, -1);}
+	| T_LOCAL namelist T_ASSIGN explist { $$ = create_stat(stat_type_local_namelist_assgin_explist, 0, $4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $2, -1);}
+	| T_WHILE exp T_DO block T_END { $$ = create_stat(stat_type_while, 0, 0, 0, $4, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1);}
 
 elseiflist:  { $$ = create_elseiflist(0, 0);}
 	| elseiflist elseifpart { $$ = create_elseiflist($1, $2);}
@@ -282,7 +283,7 @@ args: T_OP T_CP						{ $$ = create_args(0, 0, 0);}
 	| tableconstructor 				{ $$ = create_args(0, $1, 0);}
 	| T_STRING 						{ $$ = create_args(0, 0, $1);}
 
-function: T_FUNCTION funcbody  			{ $$ = create_function($2);}
+function: T_FUNCTION funcbody  			{ $$ = create_function($2, $1);}
 
 funcbody: T_OP T_CP block T_END  		{ $$ = create_funcbody($3, 0);}
 	| T_OP parlist T_CP block T_END 	{ $$ = create_funcbody($4, $2);}

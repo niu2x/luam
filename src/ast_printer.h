@@ -7,6 +7,6 @@ extern "C" {
 
 #include <ostream>
 
-void print_ast_root(const block_t *block, std::ostream &os);
+void print_ast_root(const block_t *block, std::ostream &os, const char *module_name);
 
 #endif

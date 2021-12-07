@@ -112,7 +112,7 @@ extern int yyerror(char *message, ...);
 "for" {return T_FOR;}
 "in" {return T_IN;}
 "," {return T_COMMA;}
-"function" {return T_FUNCTION;}
+"function" { yylval.lineno = yylineno; return T_FUNCTION;}
 "local" {return T_LOCAL;}
 "while" {return T_WHILE;}
 "." {return T_DOT;}

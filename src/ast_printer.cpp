@@ -1,5 +1,7 @@
 #include "ast_printer.h"
 
+#include <string.h>
+
 extern "C" {
 #include "lua.tab.h"
 }
@@ -17,7 +19,6 @@ static std::map<std::string, symbol_t> symtab;
 #define PRINT_SUB(name) if(self->name) {print_ast(self->name, os);}
 
 PRINT(args);
-PRINT(chunk);
 PRINT(elseiflist);
 PRINT(elseifpart);
 PRINT(elsepart);
@@ -35,7 +36,6 @@ PRINT(field);
 PRINT(fieldlist);
 PRINT(fieldlistnotailfieldseq);
 PRINT(fieldsep);
-PRINT(funcbody);
 PRINT(funcname);
 PRINT(funcnamelastmemberpart);
 PRINT(funcnamememberlist);
@@ -55,7 +55,11 @@ PRINT(statlist);
 PRINT(statpart);
 PRINT(tableconstructor);
 PRINT(var);
-PRINT(block);
+
+static void print_ast(const block_t* self, std::ostream &os, bool is_funcbody=false, int lineno=-1);
+static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody=false, int lineno=-1);
+static void print_ast(const funcbody_t* self, std::ostream &os, int lineno=-1);
+
 PRINT(varlist);
 
 #define output(k) \
@@ -79,15 +83,19 @@ static int level = 0;
 	newline();			\
 }
 
-void print_ast_root(const block_t *block, std::ostream &os) {
+static char module_name[1024];
+
+void print_ast_root(const block_t *block, std::ostream &os, const char *p_module_name) {
+	strncpy(module_name, p_module_name, 1024);
 	symtab.clear();
 	level = 0;
+	os << "local ____MYG = _G;\n";
 	print_ast(block, os);
 	symtab.clear();
 }
 
-PRINT(block) {
-	PRINT_SUB(chunk);
+static void print_ast(const block_t* self, std::ostream &os, bool is_funcbody, int lineno){
+	if(self->chunk) {print_ast(self->chunk, os, is_funcbody, lineno);}
 }
 
 PRINT(args) {
@@ -106,9 +114,26 @@ PRINT(args) {
 	}
 }
 
-PRINT(chunk) {
+static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, int lineno){
+	if(is_funcbody){
+		newline();
+		output("____MYG.enter_lua_function('");
+		output(module_name);
+		output("', ");
+		output(lineno);
+		output(");");
+		newline();
+	}
 	PRINT_SUB(statlist);
+
+	if(is_funcbody){
+		newline();
+		output("____MYG.exit_lua_function();");
+		newline();
+	}
+
 	PRINT_SUB(laststatpart);
+	
 }
 
 PRINT(elseiflist) {
@@ -327,12 +352,14 @@ PRINT(fieldsep) {
 	}
 }
 
-PRINT(funcbody) {
+static void print_ast(const funcbody_t* self, std::ostream &os, int lineno) {
 	output("(");
 	PRINT_SUB(parlist);
 	output(")");
 	nonewline_push();
-	PRINT_SUB(block);
+
+	if(self->block) {print_ast(self->block, os, true, lineno);}
+
 	newline_pop();
 	output("end");
 }
@@ -362,7 +389,7 @@ PRINT(funcnamememberpart) {
 
 PRINT(function) {
 	output("function");
-	PRINT_SUB(funcbody);
+	print_ast(self->funcbody, os, self->lineno);
 }
 
 PRINT(functioncall) {
@@ -506,12 +533,12 @@ PRINT(stat) {
 		case stat_type_function:
 			output("function ");
 			PRINT_SUB(funcname);
-			PRINT_SUB(funcbody);
+			print_ast(self->funcbody, os, self->lineno);
 			break;
 		case stat_type_local_function:
 			output("local function ");
 			output(self->name);
-			PRINT_SUB(funcbody);
+			print_ast(self->funcbody, os, self->lineno);
 			break;
 		case stat_type_local_namelist:
 			output("local ");
@@ -546,6 +573,9 @@ PRINT(statpart) {
 		PRINT_SUB(stat);
 		if(self->semicolon)
 			output(";");
+		newline();
+		output("____MYG.lua_line = ____MYG.lua_line + 1;");
+		newline();
 	}
 	else{
 		PRINT_SUB(macro_stat);
@@ -557,7 +587,7 @@ PRINT(macro_stat) {
 		case macro_stat_define: {
 			std::string name = self->name;
 			symtab[name] = {
-				.name = name,
+				 name,
 			};
 			break;
 		}

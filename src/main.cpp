@@ -21,7 +21,7 @@ int main(){
 
 	block_t *block =  luam_parse((char*)code.c_str());
 	if(block){
-		print_ast_root(block, std::cout);
+		print_ast_root(block, std::cout, "module_name");
 		destroy_block(block);
 	}
 	return 0;

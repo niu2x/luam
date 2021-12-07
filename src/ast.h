@@ -101,6 +101,7 @@ typedef struct funcbody_t {
 
 typedef struct function_t {
 	AST_FIELD(funcbody)
+	int lineno;
 }function_t;
 
 
@@ -232,6 +233,7 @@ typedef struct stat_t {
 		AST_FIELD(funcname)
 		AST_FIELD(funcbody);
 		name_t *name;
+		int lineno;
 	};
 }stat_t;
 
@@ -330,6 +332,7 @@ stat_t *create_stat(int type,
 	
 	, name_t *
 	, namelist_t *
+	, int lineno
 );
 
 elseiflist_t *create_elseiflist(elseiflist_t *, elseifpart_t *);
@@ -373,7 +376,7 @@ functioncall_t *create_functioncall(prefixexp_t *, args_t *, name_t *);
 
 args_t *create_args(explist_t *, tableconstructor_t *, char *sz);
 
-function_t* create_function(funcbody_t *);
+function_t* create_function(funcbody_t *, int lineno);
 
 funcbody_t* create_funcbody(block_t*, parlist_t*);
 
