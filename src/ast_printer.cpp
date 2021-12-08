@@ -4,6 +4,7 @@
 #include "ast_printer.h"
 
 #include <string.h>
+#include <stack>
 
 extern "C" {
 #include "lua.tab.h"
@@ -15,6 +16,12 @@ extern "C" {
 struct symbol_t {
 	std::string name;
 };
+
+struct ci_func_t {
+	uint16_t line;
+};
+
+static std::stack<ci_func_t> ci_stack;
 
 static std::map<std::string, symbol_t> symtab;
 
@@ -91,6 +98,7 @@ static char module_name[1024];
 void print_ast_root(const block_t *block, std::ostream &os, const char *p_module_name) {
 	strncpy(module_name, p_module_name, 1024);
 	symtab.clear();
+	ci_stack = std::stack<ci_func_t>();
 	level = 0;
 	os << "local ____MYG = _G;\n";
 	print_ast(block, os);
@@ -128,11 +136,16 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 		output(");");
 		newline();
 	}
+	ci_stack.push({.line = lineno});
 	#endif
+
+
+
 
 	PRINT_SUB(statlist);
 
 	#if defined(LUAM_HOOK_FUNCTION)
+	ci_stack.pop();
 	if(is_funcbody){
 		newline();
 		output("____MYG.exit_lua_function();");
@@ -412,6 +425,12 @@ PRINT(functioncall) {
 PRINT(laststat) {
 	switch(self->type) {
 		case laststat_type_return:
+			if(!ci_stack.empty()){
+				newline();
+				output("____MYG.exit_lua_function();");
+				newline();
+			}
+
 			output("return ");
 			PRINT_SUB(explist);
 			break;
