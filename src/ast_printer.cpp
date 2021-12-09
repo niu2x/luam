@@ -145,15 +145,20 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 	PRINT_SUB(statlist);
 
 	#if defined(LUAM_HOOK_FUNCTION)
-	ci_stack.pop();
-	if(is_funcbody){
+	if(is_funcbody && (!self->laststatpart)){
 		newline();
 		output("____MYG.exit_lua_function();");
 		newline();
 	}
 	#endif
 
+
 	PRINT_SUB(laststatpart);
+
+
+	#if defined(LUAM_HOOK_FUNCTION)
+	ci_stack.pop();
+	#endif
 	
 }
 
