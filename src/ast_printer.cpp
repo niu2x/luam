@@ -93,10 +93,22 @@ static int level = 0;
 	newline();			\
 }
 
-static char module_name[1024];
+static uint16_t module_name;
+
+std::map<std::string, uint16_t> luaname2id;
 
 void print_ast_root(const block_t *block, std::ostream &os, const char *p_module_name) {
-	strncpy(module_name, p_module_name, 1024);
+	static uint16_t luaid = 1;
+	std::string name = p_module_name;
+	auto iter = luaname2id.find(name);
+	if(luaname2id.end() == iter){
+		module_name = luaid ++;
+		luaname2id[name] = module_name;
+	}
+	else{
+		module_name = iter->second;
+	}
+
 	symtab.clear();
 	ci_stack = std::stack<ci_func_t>();
 	level = 0;
@@ -135,8 +147,8 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 		output(lineno);
 		output(");");
 		newline();
+		ci_stack.push({.line = (uint16_t)lineno});
 	}
-	ci_stack.push({.line = lineno});
 	#endif
 
 
@@ -147,18 +159,24 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 	#if defined(LUAM_HOOK_FUNCTION)
 	if(is_funcbody && (!self->laststatpart)){
 		newline();
-		output("____MYG.exit_lua_function();");
+		output("____MYG.exit_lua_function('");
+		output(module_name);
+		output("', ");
+		output(ci_stack.top().line);
+		output(");");
+
 		newline();
 	}
 	#endif
 
-
 	PRINT_SUB(laststatpart);
 
-
 	#if defined(LUAM_HOOK_FUNCTION)
-	ci_stack.pop();
+	if(is_funcbody){
+		ci_stack.pop();
+	}
 	#endif
+
 	
 }
 
@@ -432,7 +450,11 @@ PRINT(laststat) {
 		case laststat_type_return:
 			if(!ci_stack.empty()){
 				newline();
-				output("____MYG.exit_lua_function();");
+				output("____MYG.exit_lua_function('");
+				output(module_name);
+				output("', ");
+				output(ci_stack.top().line);
+				output(");");
 				newline();
 			}
 
