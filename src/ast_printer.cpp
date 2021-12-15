@@ -141,9 +141,9 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 	#if defined(LUAM_HOOK_FUNCTION)
 	if(is_funcbody){
 		newline();
-		output("____MYG.enter_lua_function('");
+		output("____MYG.enter_lua_function(");
 		output(module_name);
-		output("', ");
+		output(", ");
 		output(lineno);
 		output(");");
 		newline();
@@ -159,9 +159,9 @@ static void print_ast(const chunk_t* self, std::ostream &os, bool is_funcbody, i
 	#if defined(LUAM_HOOK_FUNCTION)
 	if(is_funcbody && (!self->laststatpart)){
 		newline();
-		output("____MYG.exit_lua_function('");
+		output("____MYG.exit_lua_function(");
 		output(module_name);
-		output("', ");
+		output(", ");
 		output(ci_stack.top().line);
 		output(");");
 
@@ -449,17 +449,25 @@ PRINT(laststat) {
 	switch(self->type) {
 		case laststat_type_return:
 			if(!ci_stack.empty()){
+
+				output("local luam_results = {");
+				PRINT_SUB(explist);
+				output("};");
+
 				newline();
-				output("____MYG.exit_lua_function('");
+				output("____MYG.exit_lua_function(");
 				output(module_name);
-				output("', ");
+				output(", ");
 				output(ci_stack.top().line);
 				output(");");
 				newline();
-			}
 
-			output("return ");
-			PRINT_SUB(explist);
+				output("return unpack(luam_results)");
+			}
+			else{
+				output("return ");
+				PRINT_SUB(explist);
+			}
 			break;
 		case laststat_type_break:
 			output("break ");
